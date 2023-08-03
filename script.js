@@ -1,57 +1,76 @@
-// Constants
-const gameContainer = document.getElementById('gameContainer');
-const scoreBoard = document.querySelector('.scoreBoard');
-const gridSize = 20;
-const numPixels = gridSize * gridSize;
-const pixelSize = 20;
+//your code here
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.getElementById('gameContainer');
+  const scoreElement = document.getElementById('score');
+  const width = 400;
+  const height = 400;
+  const pixelSize = 40;
+  const rows = height / pixelSize;
+  const cols = width / pixelSize;
+  const totalPixels = rows * cols;
 
-// Snake object
-let snake = {
-  body: [{ row: 9, col: 10 }, { row: 9, col: 9 }, { row: 9, col: 8 }],
-  direction: 'right',
-};
+  let snake = [
+    { row: 20, col: 1 },
+    { row: 20, col: 2 },
+    { row: 20, col: 3 }
+  ];
 
-// Food object
-let food = {
-  row: getRandomNumber(0, gridSize - 1),
-  col: getRandomNumber(0, gridSize - 1),
-};
+  let direction = 'right';
+  let food = {};
+  let score = 0;
 
-// Game loop
-setInterval(updateGame, 100);
+  function createGrid() {
+    for (let i = 0; i < totalPixels; i++) {
+      const pixel = document.createElement('div');
+      pixel.classList.add('pixel');
+      pixel.setAttribute('id', `pixel${i + 1}`);
+      container.appendChild(pixel);
+    }
+  }
 
-// Function to update the game state
-function updateGame() {
-  // Clear the game container
-  gameContainer.innerHTML = '';
+  function createSnake() {
+    for (let i = 0; i < snake.length; i++) {
+      const { row, col } = snake[i];
+      const pixelIndex = (row - 1) * cols + col;
+      const snakePixel = document.getElementById(`pixel${pixelIndex}`);
+      snakePixel.classList.add('snakeBodyPixel');
+    }
+  }
 
-  // Move the snake
+  function generateFood() {
+    const availablePixels = Array.from(Array(totalPixels).keys());
+    const snakePixels = snake.map(pixel => (pixel.row - 1) * cols + pixel.col);
+    const emptyPixels = availablePixels.filter(pixel => !snakePixels.includes(pixel));
+    const randomIndex = Math.floor(Math.random() * emptyPixels.length);
+    const foodPixelIndex = emptyPixels[randomIndex];
+    const foodPixel = document.getElementById(`pixel${foodPixelIndex}`);
+    foodPixel.classList.add('food');
+    food.row = Math.floor(foodPixelIndex / cols) + 1;
+    food.col = (foodPixelIndex % cols) + 1;
+  }
 
-  // Check for collision with food
+  function moveSnake() {
+    const head = Object.assign({}, snake[0]);
 
-  // Check for collision with walls or self
+    switch (direction) {
+      case 'up':
+        head.row--;
+        break;
+      case 'down':
+        head.row++;
+        break;
+      case 'left':
+        head.col--;
+        break;
+      case 'right':
+        head.col++;
+        break;
+    }
 
-  // Render the game elements
+    if (head.row < 1 || head.row > rows || head.col < 1 || head.col > cols) {
+      gameOver();
+      return;
+    }
 
-  // Update the score
-}
-
-// Function to render the game elements
-function renderGame() {
-  // Render snake body
-
-  // Render food
-}
-
-// Function to handle key events
-document.addEventListener('keydown', handleKeydown);
-
-// Function to handle keydown events
-function handleKeydown(event) {
-  // Handle arrow keys to change snake direction
-}
-
-// Function to generate a random number within a range
-function getRandomNumber(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+    const newHeadPixelIndex = (head.row - 1) * cols + head.col;
+    const newHeadPixel = document
